@@ -8,7 +8,7 @@ import sys
 base = 'Win32GUI' if sys.platform=='win32' else None
 
 executables = [
-    Executable('tkinterSetup.py', base=base, targetName = 'siuewpasetup')
+    Executable('Main-GUI.py', base=base, targetName = 'siuewpasetup')
 ]
 
 setup(name='SIUE WPA SETUP LINUX GUI',
