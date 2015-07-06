@@ -56,7 +56,7 @@ def WPASETUP():
     tkMessageBox.showinfo(title="Done", message="WPA Setup is Complete")
     root.destroy() #program is done. Exit.
 
-def displayText():
+def on_continue_button():
 
     global entryWidget
 
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
     textFrame.pack()
 
-    button = Button(root, text="Submit", command=displayText)
+    button = Button(root, text="Submit", command=on_continue_button)
     button.pack()
 
     root.mainloop()
