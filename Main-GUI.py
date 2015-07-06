@@ -61,7 +61,7 @@ def displayText():
     global entryWidget
 
     if entryWidget.get().strip() == "":
-        tkMessageBox.showerror("Error", "Enter a text value")
+        tkMessageBox.showerror("Error", "Please enter your EID.")
     else:
         WPASETUP()
 
