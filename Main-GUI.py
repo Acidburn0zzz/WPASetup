@@ -65,6 +65,7 @@ def WPASETUP():
     user_home = os.getenv("HOME")
     cert_location = user_home + '/.config/SIUE_WPA/'
     cert_name = "oitca.cer"
+    cert = cert_location + cert_name
     userUUID = str(uuid.uuid4())
 
     setup_Certificate(cert_location, cert_name)
@@ -87,7 +88,7 @@ def WPASETUP():
     s_8021x = dbus.Dictionary({
         'eap': ['peap'],
         'identity': eid,
-        'ca-cert': path_dbusByteArray(cert_location),
+        'ca-cert': path_dbusByteArray(cert),
         'system-ca-certs': True,
         'password-flags': dbus.UInt32(1),
         'phase2-auth': 'mschapv2'})
