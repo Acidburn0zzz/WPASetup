@@ -49,12 +49,12 @@ def setup_Certificate(cert_location, cert_name):
     if os.path.isfile(cert_location + cert_name):
         os.remove(cert_location + cert_name)
     #get the current working directory
-    work_dir = os.getcwd()
+    work_dir = os.getcwd() + "/"
     #check the files sha256 sum
     #TODO get hash from file for better security IE from ITS directly via .md5sum file or .sha*sum file
     properHash = "1663fb443486f27ae568b9da1eaf1a0a"
-    if isSumCorrect(work_dir + "/" + cert_name, properHash):
-        shutil.copy2(work_dir + "/" + cert_name, cert_location)
+    if isSumCorrect(work_dir + cert_name, properHash):
+        shutil.copy2(work_dir + cert_name, cert_location)
 
 
 def path_dbusByteArray(path):
