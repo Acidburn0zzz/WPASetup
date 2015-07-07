@@ -67,15 +67,15 @@ def WPASETUP():
     cert_location = user_home + '/.config/SIUE_WPA/'
     cert_name = "oitca.cer"
     cert = cert_location + cert_name
-    userUUID = str(uuid.uuid4())
+    UUID = str(uuid.uuid4())
 
     setup_Certificate(cert_location, cert_name)
 
     eid = entryWidget.get()
-
+    #TODO mac address of wireless device? Is it really needed?
     s_con = dbus.Dictionary({
         'type': '802-11-wireless',
-        'uuid': userUUID,
+        'uuid': UUID,
         'id': 'SIUE-WPA'})
 
     s_wifi = dbus.Dictionary({
