@@ -26,6 +26,7 @@ def getFileMD5SUM(filename, blocksize=2*20):
 def security_error_window(message):
     tkMessageBox.showerror(title="Certificate Error", message=message)
     #we also stop the program...
+    #TODO clean up if needed..
     root.destroy()
 
 def isSumCorrect(file, properHash):
@@ -127,7 +128,7 @@ if __name__ == "__main__":
 
     root = Tk()
 
-    root.title("SIUE WPA SETUP TOOL FOR LINUX")
+    root.title("UNOFFICIAL SIUE WPA SETUP TOOL FOR LINUX")
     root["padx"] = 40
     root["pady"] = 20
 
@@ -136,7 +137,7 @@ if __name__ == "__main__":
 
     #Create a Label to say what the program does
     welcomeLabel = Label(textFrame)
-    welcomeLabel["text"] = "Welcome to the SIUE WPA setup tool for Linux!"
+    welcomeLabel["text"] = "Welcome to the (Unofficial) SIUE WPA setup tool for Linux!"
     welcomeLabel.pack(side=TOP)
 
     #Create a Label in textFrame
