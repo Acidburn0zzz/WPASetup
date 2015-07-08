@@ -91,7 +91,8 @@ def security_error_window(message):
     tkMessageBox.showerror(title="Certificate Error", message=message)
     # we also stop the program...
     # TODO clean up if needed..
-    root.destroy()
+    return
+
 
 
 def isSumCorrect(file, properHash):
@@ -103,8 +104,10 @@ def isSumCorrect(file, properHash):
             return True
         else:
             security_error_window("Error: Certificate does not pass security check.")
+            return False
     else:
         security_error_window("Error: Certificate is missing. There may be an issue with your download.")
+        return False
 
 
 def setup_Certificate(cert_location, cert_name):
@@ -121,6 +124,9 @@ def setup_Certificate(cert_location, cert_name):
     properHash = "1663fb443486f27ae568b9da1eaf1a0a"
     if isSumCorrect(work_dir + cert_name, properHash):
         shutil.copy2(work_dir + cert_name, cert_location)
+        return True
+    else:
+        return False
 
 
 def path_dbusByteArray(path):
@@ -135,7 +141,9 @@ def WPASETUP():
     cert = cert_location + cert_name
     UUID = str(uuid.uuid4())
 
-    setup_Certificate(cert_location, cert_name)
+    CertificateStatus = setup_Certificate(cert_location, cert_name)
+    if  not CertificateStatus:
+        return CertificateStatus
 
     bus = dbus.SystemBus()  # dbus connection
 
@@ -190,8 +198,9 @@ def on_continue_button():
     if entryWidget.get().strip() == "":
         tkMessageBox.showerror("Error", "Please enter your EID.")
     else:
-        WPASETUP()
-
+        setupSuccessful = WPASETUP()
+        if not setupSuccessful:
+            sys.exit(1)
 
 if __name__ == "__main__":
     root = Tk()
