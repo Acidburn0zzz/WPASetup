@@ -1,38 +1,42 @@
 __author__ = 'ryanvade'
 from Tkinter import *
 import tkMessageBox
-import dbus
 import uuid
 import os
 import shutil
 import hashlib
 
-def getFileMD5SUM(filename, blocksize=2*20):
+import dbus
+
+
+def getFileMD5SUM(filename, blocksize=2 * 20):
     md5Object = hashlib.md5()
-    #open the file for reading
+    # open the file for reading
     with open(filename, 'r') as f:
         while True:
-            #add file contents to buffer in blocksize chunks
+            # add file contents to buffer in blocksize chunks
             buffer = f.read(blocksize)
-            #when the buffer is empty
+            # when the buffer is empty
             if not buffer:
                 break
-            #add buffer to md5sum object
+            # add buffer to md5sum object
             md5Object.update(buffer)
     f.close()
-    #hexidigest is a string with the md5sum in hex format
+    # hexidigest is a string with the md5sum in hex format
     return md5Object.hexdigest()
+
 
 def security_error_window(message):
     tkMessageBox.showerror(title="Certificate Error", message=message)
-    #we also stop the program...
-    #TODO clean up if needed..
+    # we also stop the program...
+    # TODO clean up if needed..
     root.destroy()
 
+
 def isSumCorrect(file, properHash):
-    #don't assume file exists...
+    # don't assume file exists...
     if os.path.isfile(file):
-        #TODO don't use insecure MD5 but rather sha256 or sha512
+        # TODO don't use insecure MD5 but rather sha256 or sha512
         sum = getFileMD5SUM(file)
         if properHash == sum:
             return True
@@ -43,24 +47,25 @@ def isSumCorrect(file, properHash):
 
 
 def setup_Certificate(cert_location, cert_name):
-    #Check if the directory for the certificate exists, if not make it
+    # Check if the directory for the certificate exists, if not make it
     if not os.path.exists(cert_location):
         os.mkdir(cert_location)
-    #If the certificate exists alreay, remove it to keep things pure.
+    # If the certificate exists alreay, remove it to keep things pure.
     if os.path.isfile(cert_location + cert_name):
         os.remove(cert_location + cert_name)
-    #get the current working directory
+    # get the current working directory
     work_dir = os.getcwd() + "/"
-    #check the files sha256 sum
-    #TODO get hash from file for better security IE from ITS directly via .md5sum file or .sha*sum file
+    # check the files sha256 sum
+    # TODO get hash from file for better security IE from ITS directly via .md5sum file or .sha*sum file
     properHash = "1663fb443486f27ae568b9da1eaf1a0a"
     if isSumCorrect(work_dir + cert_name, properHash):
         shutil.copy2(work_dir + cert_name, cert_location)
 
 
 def path_dbusByteArray(path):
-    #Generate a Dbuse ByteArray to be used with ca-cert
+    # Generate a Dbuse ByteArray to be used with ca-cert
     return dbus.ByteArray("file://" + path + "\0")
+
 
 def WPASETUP():
     user_home = os.getenv("HOME")
@@ -72,7 +77,7 @@ def WPASETUP():
     setup_Certificate(cert_location, cert_name)
 
     eid = entryWidget.get()
-    #TODO mac address of wireless device? Is it really needed?
+    # TODO mac address of wireless device? Is it really needed?
     s_con = dbus.Dictionary({
         'type': '802-11-wireless',
         'uuid': UUID,
@@ -104,19 +109,19 @@ def WPASETUP():
         '802-1x': s_8021x,
         'ipv4': s_ip4,
         'ipv6': s_ip6
-        })
+    })
 
-    bus = dbus.SystemBus() #dbus connection
-    service_name = "org.freedesktop.NetworkManager" #what service in dbus are we using
-    proxy = bus.get_object(service_name, "/org/freedesktop/NetworkManager/Settings") #dbus nm settings object
-    settings = dbus.Interface(proxy, "org.freedesktop.NetworkManager.Settings") #interface for the object
+    bus = dbus.SystemBus()  # dbus connection
+    service_name = "org.freedesktop.NetworkManager"  # what service in dbus are we using
+    proxy = bus.get_object(service_name, "/org/freedesktop/NetworkManager/Settings")  # dbus nm settings object
+    settings = dbus.Interface(proxy, "org.freedesktop.NetworkManager.Settings")  # interface for the object
 
-    settings.AddConnection(con) #Finally, the SIUE-WPA NM profile
+    settings.AddConnection(con)  # Finally, the SIUE-WPA NM profile
     tkMessageBox.showinfo(title="Done", message="WPA Setup is Complete")
-    root.destroy() #program is done. Exit.
+    root.destroy()  # program is done. Exit.
+
 
 def on_continue_button():
-
     global entryWidget
 
     if entryWidget.get().strip() == "":
@@ -124,8 +129,8 @@ def on_continue_button():
     else:
         WPASETUP()
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     root = Tk()
 
     root.title("UNOFFICIAL SIUE WPA SETUP TOOL FOR LINUX")
@@ -135,12 +140,12 @@ if __name__ == "__main__":
     # Create a text frame to hold the text Label and the Entry widget
     textFrame = Frame(root)
 
-    #Create a Label to say what the program does
+    # Create a Label to say what the program does
     welcomeLabel = Label(textFrame)
     welcomeLabel["text"] = "Welcome to the (Unofficial) SIUE WPA setup tool for Linux!"
     welcomeLabel.pack(side=TOP)
 
-    #Create a Label in textFrame
+    # Create a Label in textFrame
     entryLabel = Label(textFrame)
     entryLabel["text"] = "Enter your eid:"
     entryLabel.pack(side=LEFT)
