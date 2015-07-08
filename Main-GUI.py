@@ -5,8 +5,69 @@ import uuid
 import os
 import shutil
 import hashlib
+import fcntl
+import socket
+import struct
 
 import dbus
+
+
+# The Following function is from http://bit.ly/1ceqal5
+def getHwAddr(ifname):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    info = fcntl.ioctl(s.fileno(), 0x8927, struct.pack('256s', ifname[:15]))
+    return ':'.join(['%02x' % ord(char) for char in info[18:24]])
+
+
+def getWifiDeviceMAC(bus):
+    # possible device types
+    devtypes = {1: "Ethernet",
+                2: "Wi-Fi",
+                5: "Bluetooth",
+                6: "OLPC",
+                7: "WiMAX",
+                8: "Modem",
+                9: "InfiniBand",
+                10: "Bond",
+                11: "VLAN",
+                12: "ADSL",
+                13: "Bridge",
+                14: "Generic",
+                15: "Team"
+                }
+    service_name = "org.freedesktop.NetworkManager"
+    # custom proxy just for interfacing with devices
+    device_proxy = bus.get_object(service_name, "/org/freedesktop/NetworkManager")
+    manager = dbus.Interface(device_proxy, service_name)
+    # get all of the device objects on the system
+    devices = manager.GetDevices()
+    # empty string
+    wanted_device_name = ""
+    wanted_mac = ""
+
+    for d in devices:
+        # device object proxy
+        dev_proxy = bus.get_object(service_name, d)
+        # device properties interface
+        dev_prop_iface = dbus.Interface(dev_proxy, "org.freedesktop.DBus.Properties")
+        # devices properties
+        props = dev_prop_iface.GetAll(service_name + ".Device")
+
+        # what if the device type is not known ?
+        try:
+            devtype = devtypes[props['DeviceType']]
+        except KeyError:
+            devtype = "Unknown"
+        # right now we are only getting the first wifi device. Multiple WIFI devices could cause issues
+        # TODO only use active or unactive wifi connections
+        if devtype == "Wi-Fi":
+            wanted_device_name = props['Interface']
+            break
+            # no empty strings please
+    if not wanted_device_name == "":
+        # we have to typecast dbus.string to standard string
+        wanted_mac = getHwAddr(str(wanted_device_name))
+    return wanted_mac
 
 
 def getFileMD5SUM(filename, blocksize=2 * 20):
@@ -76,12 +137,16 @@ def WPASETUP():
 
     setup_Certificate(cert_location, cert_name)
 
+    bus = dbus.SystemBus()  # dbus connection
+
     eid = entryWidget.get()
-    # TODO mac address of wireless device? Is it really needed?
+    MAC = str(getWifiDeviceMAC(bus))
+    # TODO mac address of wireless device? Is it really needed? Why is it not being set?
     s_con = dbus.Dictionary({
         'type': '802-11-wireless',
         'uuid': UUID,
-        'id': 'SIUE-WPA'})
+        'id': 'SIUE-WPA',
+        'mac-address': dbus.ByteArray(MAC)})
 
     s_wifi = dbus.Dictionary({
         'ssid': dbus.ByteArray("SIUE-WPA"),
@@ -110,8 +175,6 @@ def WPASETUP():
         'ipv4': s_ip4,
         'ipv6': s_ip6
     })
-
-    bus = dbus.SystemBus()  # dbus connection
     service_name = "org.freedesktop.NetworkManager"  # what service in dbus are we using
     proxy = bus.get_object(service_name, "/org/freedesktop/NetworkManager/Settings")  # dbus nm settings object
     settings = dbus.Interface(proxy, "org.freedesktop.NetworkManager.Settings")  # interface for the object
